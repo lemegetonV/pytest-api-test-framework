@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DummyJSON product collection",
+  "type": "object",
+  "required": ["products", "total", "skip", "limit"],
+  "properties": {
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "description", "category", "price", "rating", "stock", "tags"],
+        "properties": {
+          "id": {"type": "integer"},
+          "title": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1},
+          "category": {"type": "string", "minLength": 1},
+          "price": {"type": "number"},
+          "rating": {"type": "number"},
+          "stock": {"type": "integer"},
+          "tags": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": true
+      }
+    },
+    "total": {"type": "integer"},
+    "skip": {"type": "integer"},
+    "limit": {"type": "integer"}
+  },
+  "additionalProperties": true
+}

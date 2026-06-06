@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DummyJSON user",
+  "type": "object",
+  "required": ["id", "firstName", "lastName", "email", "username", "address", "company"],
+  "properties": {
+    "id": {"type": "integer"},
+    "firstName": {"type": "string", "minLength": 1},
+    "lastName": {"type": "string", "minLength": 1},
+    "email": {"type": "string", "format": "email"},
+    "username": {"type": "string", "minLength": 1},
+    "address": {
+      "type": "object",
+      "required": ["address", "city", "state", "postalCode", "coordinates", "country"],
+      "properties": {
+        "address": {"type": "string"},
+        "city": {"type": "string"},
+        "state": {"type": "string"},
+        "postalCode": {"type": "string"},
+        "coordinates": {
+          "type": "object",
+          "required": ["lat", "lng"],
+          "properties": {
+            "lat": {"type": "number"},
+            "lng": {"type": "number"}
+          },
+          "additionalProperties": true
+        },
+        "country": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "company": {
+      "type": "object",
+      "required": ["department", "name", "title"],
+      "properties": {
+        "department": {"type": "string"},
+        "name": {"type": "string"},
+        "title": {"type": "string"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

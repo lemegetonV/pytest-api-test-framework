@@ -1,0 +1,9 @@
+{
+  "username": "emilys",
+  "password": "emilyspass",
+  "expected": {
+    "id": 1,
+    "username": "emilys",
+    "email": "emily.johnson@x.dummyjson.com"
+  }
+}

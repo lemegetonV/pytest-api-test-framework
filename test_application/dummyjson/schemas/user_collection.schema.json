@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DummyJSON user collection",
+  "type": "object",
+  "required": ["users", "total", "skip", "limit"],
+  "properties": {
+    "users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "firstName", "lastName", "email", "username", "address", "company"],
+        "properties": {
+          "id": {"type": "integer"},
+          "firstName": {"type": "string", "minLength": 1},
+          "lastName": {"type": "string", "minLength": 1},
+          "email": {"type": "string", "format": "email"},
+          "username": {"type": "string", "minLength": 1},
+          "address": {"type": "object"},
+          "company": {"type": "object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "total": {"type": "integer"},
+    "skip": {"type": "integer"},
+    "limit": {"type": "integer"}
+  },
+  "additionalProperties": true
+}
