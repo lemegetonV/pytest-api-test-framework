@@ -40,7 +40,6 @@ class APIClient:
         self.session.headers.update(
             {
                 "Accept": "application/json",
-                "Content-Type": "application/json",
             }
         )
 

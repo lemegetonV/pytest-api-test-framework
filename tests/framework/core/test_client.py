@@ -37,7 +37,50 @@ def test_get_sends_default_headers_timeout_and_stores_last_response() -> None:
     assert client.last_response is response
     request = responses.calls[0].request
     assert request.headers["Accept"] == "application/json"
+    assert "Content-Type" not in request.headers
+
+
+@responses.activate
+def test_post_json_sets_json_content_type() -> None:
+    responses.add(responses.POST, "https://example.test/login", json={"ok": True})
+    client = APIClient("https://example.test")
+
+    response = client.post("/login", json={"username": "user"})
+
+    assert response.status_code == 200
+    request = responses.calls[0].request
+    assert request.headers["Accept"] == "application/json"
     assert request.headers["Content-Type"] == "application/json"
+    assert request.body == b'{"username": "user"}'
+
+
+@responses.activate
+def test_post_form_data_sets_form_content_type() -> None:
+    responses.add(responses.POST, "https://example.test/token", json={"ok": True})
+    client = APIClient("https://example.test")
+
+    response = client.post(
+        "/token",
+        data={"grant_type": "client_credentials", "password": "secret"},
+    )
+
+    assert response.status_code == 200
+    request = responses.calls[0].request
+    assert request.headers["Accept"] == "application/json"
+    assert request.headers["Content-Type"] == "application/x-www-form-urlencoded"
+    assert request.body == "grant_type=client_credentials&password=secret"
+
+
+@responses.activate
+def test_request_headers_can_override_default_accept() -> None:
+    responses.add(responses.GET, "https://example.test/export", body="a,b\n1,2\n")
+    client = APIClient("https://example.test")
+
+    response = client.get("/export", headers={"Accept": "text/csv"})
+
+    assert response.status_code == 200
+    request = responses.calls[0].request
+    assert request.headers["Accept"] == "text/csv"
 
 
 def test_auth_helpers_set_and_clear_session_auth_state() -> None:

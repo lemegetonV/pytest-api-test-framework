@@ -57,7 +57,7 @@ code that can support any HTTP API.
 Responsibilities:
 
 - own the base URL
-- apply default JSON headers
+- apply reusable response negotiation defaults
 - expose HTTP methods: `get`, `post`, `put`, `patch`, `delete`
 - apply default timeout
 - support bearer token auth
@@ -92,6 +92,65 @@ client.get("https://example.test/users/1")
 
 Absolute URLs are preserved. Relative URLs are joined with the configured
 `base_url`.
+
+### Default Headers And Body Formats
+
+The framework default is:
+
+```http
+Accept: application/json
+```
+
+This means the client prefers JSON responses by default, which is appropriate for
+most API test suites in this project. It is still request-level overrideable:
+
+```python
+client.get("/export.csv", headers={"Accept": "text/csv"})
+```
+
+The framework does not set a global `Content-Type` header. `Content-Type`
+describes the request body format, so it should be chosen per request instead of
+being fixed on the client session.
+
+Use standard `requests` conventions:
+
+```python
+client.post("/auth/login", json={"username": "demo"})
+```
+
+This sends a JSON body and lets `requests` set:
+
+```http
+Content-Type: application/json
+```
+
+For form-encoded APIs:
+
+```python
+client.post("/oauth/token", data={"grant_type": "client_credentials"})
+```
+
+This sends form data and lets `requests` set:
+
+```http
+Content-Type: application/x-www-form-urlencoded
+```
+
+For unusual request body formats, pass request-level headers explicitly:
+
+```python
+client.post(
+    "/xml-endpoint",
+    data="<request />",
+    headers={"Content-Type": "application/xml"},
+)
+```
+
+This convention keeps the framework reusable across JSON APIs, form-encoded
+APIs, and future APIs with custom media types. Tests should only call
+`response.json()` when the endpoint contract says the response is JSON; text,
+CSV, XML, or binary endpoints should assert against `response.text` or
+`response.content`.
 
 ### Retry Policy
 
@@ -900,3 +959,32 @@ Keep these rules in mind when expanding the framework:
 8. Logs and reports should be useful but redacted.
 9. Parallel execution should be assumed unless a suite explicitly opts out.
 10. Add abstractions only when they remove real duplication or clarify ownership.
+
+## Future Improvements
+
+- Add explicit API-key authentication helpers only when a concrete API pack needs
+  them. Stripe can use the existing bearer-token support because Stripe accepts
+  `Authorization: Bearer <api_key>`. Other APIs may require headers such as
+  `X-API-Key`, `x-api-key`, or `Api-Key`; those can be supported with a small
+  helper such as `set_api_key_header(header_name, api_key)`.
+
+- Keep query-parameter API key support as a last resort. Some APIs accept keys as
+  `?api_key=...`, but this is easier to leak through URLs, logs, browser history,
+  and reports. If added, it should integrate with the existing URL redaction
+  helpers and should be documented as less preferred than header-based auth.
+
+- Consider first-class helpers for multiple common auth styles once the framework
+  has at least two real API packs with different needs. Possible additions
+  include custom header auth, API key auth, OAuth client-credentials token
+  retrieval, signed request auth, and refreshable bearer tokens.
+
+- Introduce API-specific service clients when endpoint usage becomes repetitive
+  enough to justify them. Service clients should live inside
+  `test_application/<api_name>/services/`, wrap endpoint paths and request
+  payload construction, use `framework.core.APIClient` internally, and leave
+  assertions in tests.
+
+- Avoid promoting service clients into `src/framework` unless the abstraction is
+  truly API-agnostic. A Stripe customer service, product service, or price service
+  belongs to the Stripe pack; a generic HTTP client behavior belongs to the
+  framework.
